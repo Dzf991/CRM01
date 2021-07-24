@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.bjpowernode.crm.workbench.dao.ActivityDao">
+    <insert id="saveActivity" parameterType="Activity">
+        insert into tbl_activity (id,owner,name,startDate,endDate ,cost,description,createTime,createBy)
+        values
+        (#{id}, #{owner}, #{name}, #{startDate}, #{endDate} , #{cost}, #{description}, #{createTime}, #{createBy})
+    </insert>
+    
+    <select id="getTotal" resultType="int">
+        select count(*)
+        from tbl_activity a
+        join tbl_user u
+        on a.owner = u.id
+        <where>
+            <if test="activity.name != null and activity.name !=''">
+                a.name like '%' #{activity.name} '%'
+            </if>
+            <if test="activity.owner != null and activity.owner != ''">
+                and u.name like '%' #{activity.owner} '%'
+            </if>
+            <if test="activity.startDate != null and activity.startDate != ''">
+                and  a.startDate &gt; #{activity.startDate}
+            </if>
+            <if test="activity.endDate != null and activity.endDate != ''">
+                and a.endDate &lt; #{activity.endDate}
+            </if>
+        </where>
+    </select>
+
+    <select id="getActivityList" resultType="Activity" >
+        select a.id,a.name,u.name as owner,a.startDate,a.endDate
+        from tbl_activity a
+        join tbl_user u
+        on a.owner = u.id
+        <where>
+            <if test="activity.name != null and activity.name !=''">
+                a.name like '%' #{activity.name} '%'
+            </if>
+            <if test="activity.owner != null and activity.owner != ''">
+               and u.name like '%' #{activity.owner} '%'
+            </if>
+            <if test="activity.startDate != null and activity.startDate != ''">
+                and  a.startDate &gt; #{activity.startDate}
+            </if>
+            <if test="activity.endDate != null and activity.endDate != ''">
+                and a.endDate &lt; #{activity.endDate}
+            </if>
+
+        </where>
+
+        order by a.createTime desc
+        limit #{pageVo.skipCount},#{pageVo.pageSize}
+    </select>
+
+    <delete id="delActivity" parameterType="string" >
+        delete from tbl_activity
+    <where>
+        id in
+        <foreach collection="array" item="item" open="(" separator="," close=")">
+           #{item}
+        </foreach>
+    </where>
+    </delete>
+
+    <select id="getActivityById" parameterType="string" resultType="Activity">
+        select u.name as owner ,a.name ,a.startDate, a.endDate, a.cost, a.description
+        from tbl_activity a
+        join tbl_user u
+        on a.owner = u.id
+        where a.id = #{id}
+    </select>
+
+    <update id="editActivityByAId" parameterType="Activity" >
+        update tbl_activity set owner=#{owner},
+        name= #{name},
+        startDate= #{startDate},
+        endDate = #{endDate} ,
+        cost=#{cost},
+        description=#{description},
+        editTime=#{editTime},
+        editBy=#{editBy}
+        where id = #{id}
+    </update>
+    <select id="getActivityDetails" parameterType="string" resultType="Activity">
+        select a.id, u.name as owner ,a.name ,a.startDate, a.endDate, a.cost, a.description, a.createBy, a.editBy, a.editTime, a.createTime
+        from tbl_activity a
+        join tbl_user u
+        on a.owner = u.id
+        where a.id = #{id}
+    </select>
+</mapper>

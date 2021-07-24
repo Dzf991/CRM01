@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.bjpowernode.crm.workbench.dao.ClueDao">
+    <insert id="addClue" parameterType="Clue">
+        insert into tbl_clue (id,
+        fullname,
+        appellation,
+        owner,
+        company,
+        job,
+        email,
+        phone,
+        website,
+        mphone,
+        state,
+        source,
+        createBy ,
+        createTime,
+        description,
+        contactSummary,
+        nextContactTime,
+        address)
+        values (#{id},
+                 #{fullname},
+                 #{appellation},
+                 #{owner},
+                 #{company},
+                 #{job},
+                 #{email},
+                 #{phone},
+                 #{website},
+                 #{mphone},
+                 #{state},
+                 #{source},
+                 #{createBy} ,
+                 #{createTime},
+                 #{description},
+                 #{contactSummary},
+                 #{nextContactTime},
+                   #{address})
+    </insert>
+    <select id="getDetail" parameterType="string" resultType="Clue">
+        select c.id,
+               c.fullname,
+               c.appellation,
+               u.name as owner,
+               c.company,
+               c.job,
+               c.email,
+               c.phone,
+               c.website,
+               c.mphone,
+               c.state,
+               c.source,
+               c.createBy ,
+               c.createTime,
+               c.description,
+               c.contactSummary,
+               c.nextContactTime,
+               c.address,
+               c.editBy,
+               c.editTime from tbl_clue c
+               join tbl_user u
+            on u.id = c.owner
+            where c.id = #{id}
+    </select>
+
+    <select id="getActivityList" parameterType="string" resultType="Activity">
+        select a.id,a.name,u.name as owner,a.startDate,a.endDate
+        from tbl_activity a
+        join tbl_user u
+        on a.owner = u.id
+        <where>
+        <if test="name != null and name !=''">
+            a.name like '%' #{name} '%'
+        </if>
+            and a.id not in
+            (select activityId
+            from tbl_clue_activity_relation
+            where clueId=#{clueId})
+        </where>
+        order by a.createTime desc
+    </select>
+    <select id="searchActivity" parameterType="string" resultType="Activity">
+        select a.id,a.name,u.name as owner,a.startDate,a.endDate
+        from tbl_activity a
+        join tbl_user u
+        on a.owner = u.id
+        <where>
+            <if test="name != null and name !=''">
+                a.name like '%' #{name} '%'
+            </if>
+        </where>
+        order by a.createTime desc
+    </select>
+
+    <select id="getClueDetail" parameterType="string" resultType="Clue">
+        select id,
+               fullname,
+               appellation,
+               owner,
+               company,
+               job,
+               email,
+               phone,
+               website,
+               mphone,
+               state,
+               source,
+               createBy ,
+               createTime,
+               description,
+               contactSummary,
+               nextContactTime,
+               address,
+               editBy,
+               editTime
+            from tbl_clue
+            where id = #{id}
+    </select>
+
+    <delete id="delClue" parameterType="string">
+        delete from tbl_clue where Id = #{clueId}
+    </delete>
+
+    <select id="getClueCount"  resultType="int">
+        select count(*)
+        from tbl_clue c
+        join tbl_user u
+        on c.owner = u.id
+        <where>
+            <if test="clue.fullname != null and clue.fullname != ''">
+                c.fullname like '%' #{clue.fullname} '%'
+            </if>
+            <if test="clue.company != null and clue.company != ''">
+                and c.company like '%' #{clue.company} '%'
+            </if>
+            <if test="clue.phone != null and clue.phone != ''">
+                and c.phone like '%' #{clue.phone} '%'
+            </if>
+            <if test="clue.mphone != null and clue.mphone != ''">
+                and c.mphone like '%' #{clue.mphone} '%'
+            </if>
+            <if test="clue.source != null and clue.source != ''">
+                and c.source like '%' #{clue.source} '%'
+            </if>
+            <if test="clue.owner != null and clue.owner != ''">
+                and c.owner like '%' #{clue.owner} '%'
+            </if>
+            <if test="clue.state != null and clue.state != ''">
+                and c.stage like '%' #{clue.state} '%'
+            </if>
+        </where>
+    </select>
+
+    <select id="getClueList" resultType="Clue">
+        select c.id, c.fullname, c.company, c.phone, c.mphone, c.source, u.name as owner, c.state
+        from tbl_clue c
+        join tbl_user u
+        on c.owner = u.id
+        <where>
+            <if test="clue.fullname != null and clue.fullname != ''">
+                    c.fullname like '%' #{clue.fullname} '%'
+            </if>
+            <if test="clue.company != null and clue.company != ''">
+               and c.company like '%' #{clue.company} '%'
+            </if>
+            <if test="clue.phone != null and clue.phone != ''">
+                and c.phone like '%' #{clue.phone} '%'
+            </if>
+            <if test="clue.mphone != null and clue.mphone != ''">
+                and c.mphone like '%' #{clue.mphone} '%'
+            </if>
+            <if test="clue.source != null and clue.source != ''">
+                and c.source like '%' #{clue.source} '%'
+            </if>
+            <if test="clue.owner != null and clue.owner != ''">
+                c.owner like '%' #{clue.owner} '%'
+            </if>
+            <if test="clue.state != null and clue.state != ''">
+                c.stage like '%' #{clue.state} '%'
+            </if>
+        </where>
+        limit #{pageVo.skipCount},#{pageVo.pageSize}
+    </select>
+</mapper>
